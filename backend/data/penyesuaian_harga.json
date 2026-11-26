@@ -1,0 +1,19 @@
+{
+  "keterangan": "Data untuk menyesuaikan harga dataset (tingkat harga sekitar 2018) ke harga sekarang. Model TIDAK dilatih ulang; faktor ini hanya dikalikan ke hasil prediksi saat ditampilkan.",
+  "tahun_dasar_data": 2018,
+  "alasan_tahun_dasar": "Kaggle mengunggah file ini pada 12 Nov 2024, tetapi isinya laptop generasi 2016-2018: CPU Intel generasi 6-8 (terbaru Core i5-8250U / i7-8550U, rilis akhir 2017), GPU GeForce GTX seri 10, belum ada CPU Intel generasi 8 seri H (2018) maupun GPU RTX. Maka harga diasumsikan berada pada tingkat harga tahun 2018.",
+  "hicp": {
+    "sumber": "Eurostat, HICP Total untuk Euro Area (19 negara), Index 2025=100, bulanan, tidak disesuaikan musiman. Diambil dari FRED seri CP0000EZ19M086NEST (https://fred.stlouisfed.org/series/CP0000EZ19M086NEST), last updated 2026-11-18, diakses 2026-11-26.",
+    "bulanan_tahun_dasar": {
+      "2018-01": 78.92, "2018-02": 79.09, "2018-03": 79.97, "2018-04": 80.29,
+      "2018-05": 80.79, "2018-06": 80.88, "2018-07": 80.70, "2018-08": 80.82,
+      "2018-09": 81.14, "2018-10": 81.34, "2018-11": 80.89, "2018-12": 80.85
+    },
+    "terkini": {"periode": "2026-10", "indeks": 104.77}
+  },
+  "kurs_eur_idr": {
+    "nilai": 20010,
+    "sumber": "XE mid-market rate (https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=IDR)",
+    "tanggal": "2026-11-25"
+  }
+}

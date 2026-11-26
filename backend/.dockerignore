@@ -1,0 +1,13 @@
+# File yang TIDAK ikut disalin ke image Docker
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+*.db
+.env
+# model & gambar dibuat ulang di dalam container
+models/*
+!models/.gitkeep
+outputs/*
+!outputs/.gitkeep

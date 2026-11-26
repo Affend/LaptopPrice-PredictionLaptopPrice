@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Token warna & huruf (dipakai sebagai kelas Tailwind, mis. text-tinta-2, bg-halaman) */
+@theme {
+  --color-halaman: #f9f9f7;
+  --color-permukaan: #fcfcfb;
+  --color-tinta: #0b0b0b;
+  --color-tinta-2: #52514e;
+  --color-redup: #898781;
+  --color-garis: #e1e0d9;
+  --color-sumbu: #c3c2b7;
+  --color-biru: #2a78d6;
+  --color-biru-tua: #1c5cab;
+  --color-biru-muda: #e8f1fc;
+  --color-oranye: #eb6834;
+  --color-merah: #d03b3b;
+  --color-peringatan: #fab219;
+  --color-peringatan-muda: #fff6e0;
+  --color-baik: #006300;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-halaman);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+}
+
+/* angka yang harus sejajar di kolom tabel / sumbu */
+.angka {
+  font-variant-numeric: tabular-nums;
+}
+
+/* tabel data standar */
+.tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.tabel th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-tinta-2);
+  border-bottom: 1px solid var(--color-sumbu);
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+}
+.tabel td {
+  border-bottom: 1px solid var(--color-garis);
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+}
+.tabel td.kanan,
+.tabel th.kanan {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tabel tr.sorot td {
+  background: var(--color-biru-muda);
+}
+
+/* KaTeX blok agar tidak meluber di layar kecil */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}

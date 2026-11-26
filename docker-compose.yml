@@ -1,0 +1,59 @@
+# docker-compose.yml — Menjalankan seluruh sistem dengan satu perintah:
+#     docker compose up --build
+# Website: http://localhost:3000   API: http://localhost:8000/docs
+#
+# Nilai ${...} diambil dari file .env di folder ini (salin dari .env.example);
+# jika .env tidak ada, nilai default setelah ":-" yang dipakai.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-laptopprice}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laptopprice}
+      POSTGRES_DB: ${POSTGRES_DB:-laptopprice}
+    volumes:
+      - data_postgres:/var/lib/postgresql/data
+    # Backend baru dinyalakan setelah PostgreSQL benar-benar siap
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laptopprice} -d ${POSTGRES_DB:-laptopprice}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-laptopprice}:${POSTGRES_PASSWORD:-laptopprice}@postgres:5432/${POSTGRES_DB:-laptopprice}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      # Kosong = pakai nilai di backend/data/penyesuaian_harga.json
+      KURS_EUR_IDR: ${KURS_EUR_IDR:-}
+      FAKTOR_INFLASI: ${FAKTOR_INFLASI:-}
+    volumes:
+      # model .joblib & gambar PNG disimpan di volume agar tidak hilang saat container dibuat ulang
+      - data_model:/app/models
+      - data_output:/app/outputs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # alamat API yang dipanggil oleh BROWSER (bukan oleh container)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  data_postgres:
+  data_model:
+  data_output:

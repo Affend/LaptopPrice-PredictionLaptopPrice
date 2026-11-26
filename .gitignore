@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Database lokal (SQLite)
+*.db
+*.sqlite3
+
+# Model hasil training (bisa dibuat ulang dengan: python -m ml.train)
+backend/models/*
+!backend/models/.gitkeep
+
+# Rahasia / konfigurasi lokal
+.env
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
