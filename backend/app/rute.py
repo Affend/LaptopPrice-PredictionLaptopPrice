@@ -8,6 +8,7 @@ Logika perhitungan tidak ditulis di sini.
     GET  /api/health               status API, database, dan model aktif
     GET  /api/dataset/summary      ringkasan & statistik dataset
     GET  /api/dataset/eda          data grafik eksplorasi
+    GET  /api/dataset/laptop       cari laptop di dataset (isi form sekali klik)
     GET  /api/options              pilihan dropdown form prediksi
     POST /api/predict              prediksi harga + simpan ke riwayat
     GET  /api/models               daftar versi model & metrik
@@ -21,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.layanan_dataset import cari_laptop
 from app.layanan_prediksi import hitung_prediksi
 from app.skema import InputPrediksi, ResponsPrediksi
 from db import repository
@@ -66,6 +68,16 @@ def dataset_summary(request: Request):
 @router.get("/dataset/eda")
 def dataset_eda(request: Request):
     return request.app.state.cache["eda"]
+
+
+@router.get("/dataset/laptop")
+def dataset_laptop(
+    request: Request,
+    q: str = Query("", max_length=100, description="kata kunci, mis. 'dell i7'"),
+    batas: int = Query(12, ge=1, le=50),
+):
+    """Mencari laptop di dataset untuk mengisi form prediksi dengan sekali klik."""
+    return cari_laptop(request.app.state.cache["laptop"], q, batas)
 
 
 @router.get("/options")

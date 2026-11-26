@@ -294,18 +294,35 @@ export interface Eda {
   sebaran: { ram: number; ppi: number; ssd: number; berat: number; harga: number; tipe: string; merek: string }[];
 }
 
+export interface ModelCpu {
+  nilai: string;
+  kategori: string;
+  ghz: number;
+  ghz_variasi: number[];
+  jumlah: number;
+}
+
+export interface ModelGpu {
+  nilai: string;
+  merek: string;
+  jumlah: number;
+}
+
 export interface Opsi {
   company: { nilai: string; jumlah: number }[];
   type_name: { nilai: string; jumlah: number }[];
   cpu_kategori: { nilai: string; jumlah: number }[];
+  cpu_model: ModelCpu[];
   gpu_merek: { nilai: string; jumlah: number }[];
+  gpu_model: ModelGpu[];
   os: { nilai: string; jumlah: number }[];
-  resolusi: { lebar_px: number; tinggi_px: number; jumlah: number }[];
+  resolusi: { lebar_px: number; tinggi_px: number; nama: string | null; jumlah: number }[];
   ram_gb: number[];
   ssd_gb: number[];
   hdd_gb: number[];
   flash_gb: number[];
   inches: number[];
+  berat_tipikal: { per_tipe_inci: Record<string, number>; per_tipe: Record<string, number>; semua: number };
   rentang: Record<string, { min: number; max: number }>;
   nilai_default: InputPrediksi;
   penyesuaian_harga: PenyesuaianHarga;
@@ -318,6 +335,7 @@ export interface InputPrediksi {
   inches: number;
   ram_gb: number;
   berat_kg: number;
+  cpu_model?: string | null;
   cpu_kategori: string;
   cpu_ghz: number;
   lebar_px: number;
@@ -327,8 +345,24 @@ export interface InputPrediksi {
   ssd_gb: number;
   hdd_gb: number;
   flash_gb: number;
+  gpu_model?: string | null;
   gpu_merek: string;
   os: string;
+}
+
+/** Laptop dari dataset (GET /api/dataset/laptop), untuk mengisi form sekali klik. */
+export interface LaptopDataset {
+  id: number;
+  label: string;
+  ringkas: string;
+  harga_euro: number;
+  set: "latih" | "uji";
+  input: InputPrediksi;
+}
+
+export interface HasilCariLaptop {
+  total_cocok: number;
+  data: LaptopDataset[];
 }
 
 export interface HasilPrediksi {

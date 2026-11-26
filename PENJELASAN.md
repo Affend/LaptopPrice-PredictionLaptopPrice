@@ -194,9 +194,9 @@ Prinsipnya **satu sumber kebenaran**:
 | File | Penjelasan |
 |---|---|
 | `main.py` | `buat_app()`: CORS, format pesan galat validasi, dan `siklus_hidup` (memuat dataset & model aktif sekali saat menyala). Jika model gagal dimuat, API tetap hidup dan `/predict` menjawab 503. |
-| `rute.py` | 8 endpoint (daftar ada di README). Isinya tipis: memanggil layanan/repository saja. |
+| `rute.py` | 9 endpoint (daftar ada di README). Isinya tipis: memanggil layanan/repository saja. |
 | `skema.py` | `InputPrediksi` (Pydantic: tipe & batas wajar; validator "penyimpanan tidak boleh kosong"), `ke_kolom_model()` (nama field API → nama kolom pipeline), dan bentuk respons. |
-| `layanan_dataset.py` | `ringkasan()`, `eda()`, `opsi_form()`: semuanya dihitung dari CSV memakai fungsi preprocessing yang sama. |
+| `layanan_dataset.py` | `ringkasan()`, `eda()`, `opsi_form()`: semuanya dihitung dari CSV memakai fungsi preprocessing yang sama. Untuk form yang mudah dipakai: `daftar_model_cpu()` (92 model prosesor beserta kategori & clock yang paling umum, sehingga pengguna tidak perlu mengetik GHz), `daftar_model_gpu()` (105 model kartu grafis → merek), `berat_tipikal()` (median berat per tipe & ukuran layar), `daftar_laptop()` + `cari_laptop()` (cari laptop di dataset untuk mengisi form; ditandai data latih/uji sesuai pembagian training, data uji ditampilkan lebih dulu). |
 | `layanan_prediksi.py` | `muat_model_aktif()`, `hitung_prediksi()` (harga, rentang, inflasi & kurs, kontribusi), `_peringatan()` (input di luar rentang data latih, merek langka, kolom identik). |
 
 ### 3.5 File lain di `backend/`
@@ -204,7 +204,7 @@ Prinsipnya **satu sumber kebenaran**:
 | File | Penjelasan |
 |---|---|
 | `siapkan.py` | Dijalankan otomatis di Docker: tunggu database, migrasi, lalu training jika belum ada model aktif atau file modelnya hilang. |
-| `tests/` | 68 tes pytest (lihat README). `conftest.py` menjalankan pipeline sekali per sesi tes dan membuat database SQLite sementara lewat migrasi Alembic. |
+| `tests/` | 72 tes pytest (lihat README). `conftest.py` menjalankan pipeline sekali per sesi tes dan membuat database SQLite sementara lewat migrasi Alembic. |
 | `analysis.ipynb` | Notebook analisis langkah demi langkah dengan penjelasan Markdown. |
 | `data/penyesuaian_harga.json` | 12 nilai HICP bulanan 2018, HICP Oktober 2026, kurs, dan sumber masing-masing. |
 
@@ -222,7 +222,7 @@ Prinsipnya **satu sumber kebenaran**:
 | `components/Rumus.tsx` | Merender LaTeX dengan KaTeX di server. |
 | `app/page.tsx` | Beranda: latar belakang, tujuan, diagram alur, angka ringkas dari API. |
 | `app/eksplorasi/page.tsx` | Statistik dataset, distribusi harga vs ln(harga), korelasi, harga per kelompok, sebaran, contoh data. |
-| `app/prediksi/page.tsx` | Form (pilihan dari dataset), hasil (Rp, rentang, langkah perhitungan, peringatan, kontribusi fitur), riwayat. |
+| `app/prediksi/page.tsx` | (1) **Cari laptop di dataset** lalu klik *Pakai* untuk mengisi form sekali klik. (2) Form: prosesor & kartu grafis dipilih berdasarkan **nama model** (kategori CPU, clock GHz, dan merek GPU terisi otomatis), resolusi diberi nama umum (HD, Full HD, 4K), berat terisi otomatis dari berat tipikal. (3) Hasil: harga Rp & kisaran, langkah perhitungan, peringatan, kontribusi fitur, dan **perbandingan dengan harga asli** bila laptop diambil dari dataset. (4) Riwayat. |
 | `app/evaluasi/page.tsx` | 14 bagian validasi (lihat bagian 5), dengan dropdown versi model. |
 | `app/metode/page.tsx` | Rumus dan penjelasan metode (KaTeX). |
 
@@ -532,7 +532,13 @@ Sebagian hasil berlaku untuk seluruh run, bukan per model: info dataset, pemilih
 **33. Apa yang dilakukan backend saat Docker dinyalakan?**
 `siapkan.py` menunggu PostgreSQL, menjalankan migrasi Alembic, lalu melatih model hanya jika belum ada model aktif. Setelah itu uvicorn menyala. Saat restart, model tidak dilatih ulang.
 
-**34. Bagaimana meningkatkan model ke depan?**
+**34. Pengguna awam tidak tahu clock CPU atau berat laptopnya. Bagaimana form menanganinya?**
+- **CPU:** pengguna memilih **nama model prosesor** seperti yang tertulis di spesifikasi (mis. "Intel Core i5 7200U"). Dari dataset diketahui model itu termasuk kategori Intel Core i5 dan clock-nya 2,5 GHz, jadi keduanya terisi otomatis. Dari 92 model CPU, 80 hanya punya satu nilai clock; untuk 12 sisanya dipakai nilai yang paling sering, dan pilihan clock lain tetap tersedia.
+- **GPU:** dipilih berdasarkan nama model (mis. "GeForce GTX 1050"), lalu merek GPU terisi otomatis. Model sendiri hanya memakai merek GPU.
+- **Berat:** diisi otomatis dengan median berat laptop sejenis (tipe & ukuran layar yang sama), dan tetap bisa diubah.
+- **Paling mudah:** cari laptop yang mirip di dataset, klik *Pakai*, lalu ubah bagian yang berbeda. Jika laptop tidak diubah, hasil prediksi dibandingkan langsung dengan harga aslinya. Laptop bertanda "data uji" memberi perbandingan yang jujur, karena tidak dipakai saat melatih model.
+
+**35. Bagaimana meningkatkan model ke depan?**
 - Menambah fitur yang lebih informatif: tipe GPU (GTX 1050 vs 1070), generasi CPU, seri premium.
 - Memakai data harga terbaru agar benar-benar mencerminkan pasar sekarang.
 - Mencoba model non-linear (pohon keputusan / gradient boosting) sebagai pembanding, tetap dengan baseline dan CV yang sama.

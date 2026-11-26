@@ -66,6 +66,66 @@ def test_options_dari_dataset(klien):
     assert r["kategori_model"]["Company"][0] == "Dell"
 
 
+def test_options_model_cpu_gpu_dan_berat(klien):
+    """Form cukup memilih model CPU/GPU; kategori & clock ikut dari dataset."""
+    c, _ = klien
+    r = c.get("/api/options").json()
+    cpu = {d["nilai"]: d for d in r["cpu_model"]}
+    assert cpu["Intel Core i5 7200U"]["kategori"] == "Intel Core i5"
+    assert cpu["Intel Core i5 7200U"]["ghz"] == 2.5  # nilai clock yang paling sering untuk model ini
+    assert sum(d["jumlah"] for d in r["cpu_model"]) == 1274
+    assert "Intel Core i5 (model tidak disebut)" in cpu
+    gpu = {d["nilai"]: d for d in r["gpu_model"]}
+    assert gpu["Nvidia GeForce GTX 1050"]["merek"] == "Nvidia"
+    # nilai default konsisten: kategori & clock sesuai model CPU default
+    d = r["nilai_default"]
+    assert cpu[d["cpu_model"]]["kategori"] == d["cpu_kategori"] and cpu[d["cpu_model"]]["ghz"] == d["cpu_ghz"]
+    assert gpu[d["gpu_model"]]["merek"] == d["gpu_merek"]
+    assert r["berat_tipikal"]["per_tipe_inci"]["Gaming|17.3"] > r["berat_tipikal"]["per_tipe_inci"]["Ultrabook|13.3"]
+    assert {"lebar_px": 1920, "tinggi_px": 1080, "nama": "Full HD"}.items() <= r["resolusi"][0].items()
+
+
+def test_cari_laptop(klien):
+    c, _ = klien
+    r = c.get("/api/dataset/laptop", params={"q": "dell xps"}).json()
+    assert r["total_cocok"] > 0
+    assert all("xps" in d["label"].lower() for d in r["data"])
+    # laptop data uji tampil lebih dulu daripada data latih
+    urutan = [d["set"] for d in c.get("/api/dataset/laptop", params={"q": "dell", "batas": 50}).json()["data"]]
+    assert urutan == sorted(urutan, key=lambda s: s != "uji")
+    # tanpa kata kunci: contoh laptop dari data UJI, terurut dari murah ke mahal
+    contoh = c.get("/api/dataset/laptop").json()["data"]
+    assert len(contoh) == 12 and all(d["set"] == "uji" for d in contoh)
+    harga = [d["harga_euro"] for d in contoh]
+    assert harga == sorted(harga)
+    assert c.get("/api/dataset/laptop", params={"q": "tidakadalaptopini"}).json()["total_cocok"] == 0
+
+
+def test_pembagian_latih_uji_sama_dengan_training(hasil_training):
+    """Tanda 'uji' di daftar laptop harus sama persis dengan data uji saat training,
+    dan harga yang ditampilkan harus sama dengan harga aktual data uji."""
+    from app.layanan_dataset import daftar_laptop, muat_data_dataset
+
+    hasil, _ = hasil_training
+    daftar = daftar_laptop(muat_data_dataset(ambil_pengaturan().path_dataset))
+    uji = [d for d in daftar if d["set"] == "uji"]
+    assert len(uji) == hasil["dataset"]["jumlah_uji"] == 255
+    harga_uji_training = sorted(t["aktual_euro"] for t in hasil["model"]["ols_normal_equation"]["residual"]["titik"])
+    assert sorted(d["harga_euro"] for d in uji) == pytest.approx(harga_uji_training)
+
+
+def test_prediksi_laptop_dari_dataset_sama_dengan_model(klien):
+    """Isi form dari laptop dataset -> prediksi = prediksi model langsung untuk baris itu."""
+    c, model_terlatih = klien
+    laptop = c.get("/api/dataset/laptop", params={"q": "lenovo legion"}).json()["data"][0]
+    d = c.post("/api/predict", json=laptop["input"]).json()
+    df, _ = bersihkan_data(muat_dataset(ambil_pengaturan().path_dataset))
+    langsung = model_terlatih["ols_normal_equation"].predict_euro(ekstrak_fitur(df).iloc[[laptop["id"]]])[0]
+    assert d["harga_dataset_eur"] == pytest.approx(langsung, rel=1e-12)
+    riwayat = c.get("/api/predictions/history").json()["data"][0]
+    assert riwayat["input"]["cpu_model"] == laptop["input"]["cpu_model"]
+
+
 # --------------------------- Prediksi -------------------------------------
 def test_predict_berhasil_dan_tersimpan(klien):
     c, _ = klien

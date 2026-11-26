@@ -55,6 +55,11 @@ class InputPrediksi(BaseModel):
     flash_gb: float = Field(default=0, ge=0, le=2000)
     gpu_merek: str = Field(min_length=1, max_length=40)
     os: str = Field(min_length=1, max_length=40)
+    # Nama model CPU/GPU yang dipilih di form (mis. "Intel Core i5 7200U").
+    # Tidak dipakai model (model memakai cpu_kategori, cpu_ghz, gpu_merek),
+    # hanya disimpan di riwayat agar mudah dibaca.
+    cpu_model: str | None = Field(default=None, max_length=80)
+    gpu_model: str | None = Field(default=None, max_length=80)
 
     @model_validator(mode="after")
     def _penyimpanan_tidak_kosong(self):

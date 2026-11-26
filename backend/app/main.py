@@ -51,6 +51,7 @@ def buat_app(pembuat_session: sessionmaker[Session] | None = None, path_dataset:
             "summary": layanan_dataset.ringkasan(data),
             "eda": layanan_dataset.eda(data),
             "options": layanan_dataset.opsi_form(data),
+            "laptop": layanan_dataset.daftar_laptop(data),
         }
         state.penyesuaian = info_penyesuaian_harga(pengaturan)
 

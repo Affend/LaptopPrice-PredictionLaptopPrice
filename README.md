@@ -187,7 +187,7 @@ cd backend
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Terdapat 68 tes:
+Terdapat 72 tes:
 - [test_metrics_and_models.py](backend/tests/test_metrics_and_models.py): metrik manual = `sklearn.metrics`, Normal Equation / Ridge manual = scikit-learn, Gradient Descent konvergen.
 - [test_preprocessing.py](backend/tests/test_preprocessing.py): parsing setiap format kolom, tidak ada data leakage, fitur dari form = fitur dari CSV.
 - [test_database.py](backend/tests/test_database.py): migrasi, versi model, hanya satu model aktif, JSON aman untuk PostgreSQL.
@@ -229,7 +229,8 @@ Notebook memanggil fungsi yang sama di `ml/`, sehingga angkanya sama dengan webs
 | GET | `/api/health` | status API, database, dan model aktif |
 | GET | `/api/dataset/summary` | ringkasan & statistik dataset |
 | GET | `/api/dataset/eda` | data grafik eksplorasi (distribusi, korelasi, harga per kelompok) |
-| GET | `/api/options` | pilihan dropdown form (dari dataset) + data kurs/inflasi |
+| GET | `/api/dataset/laptop?q=dell xps&batas=12` | cari laptop di dataset untuk mengisi form sekali klik (beserta harga asli & tanda data latih/uji) |
+| GET | `/api/options` | pilihan dropdown form dari dataset (merek, tipe, model CPU + clock, model GPU, resolusi, berat tipikal) + data kurs/inflasi |
 | POST | `/api/predict` | prediksi harga (IDR & EUR), rentang, kontribusi fitur, peringatan; disimpan ke tabel `predictions` |
 | GET | `/api/models` | daftar semua versi model & metriknya |
 | GET | `/api/evaluation/{model_id}` | semua hasil evaluasi satu model (untuk grafik) |
